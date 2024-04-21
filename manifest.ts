@@ -11,6 +11,7 @@ export default Manifest({
   datastores: [],
   functions: [ReadMessageFromLinkDefinition],
   botScopes: [
-    "channels:history"
+    "channels:history",
+    "groups:history"
   ],
 });
