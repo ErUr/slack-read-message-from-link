@@ -11,6 +11,11 @@ export const ReadMessageFromLinkDefinition = DefineFunction({
           type: Schema.types.string,
           description: "Link to Slack message",
         },
+        workInThreads: {
+          type: Schema.types.boolean,
+          description: "Allow fetching message content from threaded replies",
+          default: true
+        },
       },
       required: ["messageLink"],
     },
@@ -32,22 +37,66 @@ export const ReadMessageFromLinkDefinition = DefineFunction({
 export default SlackFunction(
     ReadMessageFromLinkDefinition,
     async ({ inputs, client }) => {
+      const THREAD_TS_REGEX = /thread_ts=[0-9\.]+/g
+
       //example messageLink: https://example.slack.com/archives/C01ABCDEFGH/p123456789012345
+      //example threaded messageLink: https://example.slack.com/archives/C01ABCDEFGH/p123456789012345?thread_ts=123456789.012345&cid=C01234567
       const channelId = inputs.messageLink.split('/')[4]
       const msgTsRaw = inputs.messageLink.split('/')[5]
-      const msgTs = msgTsRaw.slice(1,-6) + '.' + msgTsRaw.slice(-6)
-      const msgRes = await client.conversations.history({    
-        "channel": channelId,
-        "latest": msgTs,
-        "limit": 1,
-        "inclusive": true
-      })
-      if (!msgRes.ok) {
+      const threadParent = msgTsRaw.match(THREAD_TS_REGEX)
+      if (threadParent?.length && threadParent?.length > 1){
         return {
-          error: `Failed to fetch linked message: ${msgRes.error}`,
+          error: `Bad message timestamp`,
         };
       }
+      if (threadParent?.length == 1){
+        if (inputs.workInThreads === false){
+          return {
+            error: `This step is configured to only work on top-level messages`,
+          };
+        }
+        const threadParentTs = threadParent[0].slice(10)
+        const actualMsgTsRaw = msgTsRaw.split("?")[0]
+        const msgTs = actualMsgTsRaw.slice(1,-6) + '.' + actualMsgTsRaw.slice(-6)
+        
+        const msgRes = await client.conversations.replies({    
+          "channel": channelId,
+          "ts": threadParentTs,
+          "latest": msgTs,
+          "limit": 1,
+          "inclusive": true
+        })
+        console.log(msgRes)
+        if (!msgRes.ok) {
+          return {
+            error: `Failed to fetch linked message: ${msgRes.error}`,
+          };
+        }
+        //first message is always the thread parent. The result should only include that and the message we're searching for
+        if (msgRes.messages?.length !== 2) {
+          return {
+            error: `Got an unexpected number of messsages back when fetching threaded message. Expecting 2, got ${msgRes.messages?.length ?? 0}`,
+          };
+        }
+        return { outputs: { messageContent: msgRes.messages[1].text, messageContentRaw: msgRes.messages[1].text } };
+      }else{
+        const msgTs = msgTsRaw.slice(1,-6) + '.' + msgTsRaw.slice(-6)
+        
+        const msgRes = await client.conversations.history({    
+          "channel": channelId,
+          "latest": msgTs,
+          "limit": 1,
+          "inclusive": true
+        })
+        if (!msgRes.ok) {
+          return {
+            error: `Failed to fetch linked message: ${msgRes.error}`,
+          };
+        }
+        return { outputs: { messageContent: msgRes.messages[0].text, messageContentRaw: msgRes.messages[0].text } };
+      }
+
   
-      return { outputs: { messageContent: msgRes.messages[0].text, messageContentRaw: msgRes.messages[0].text } };
+      
     },
   );
