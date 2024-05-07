@@ -11,10 +11,9 @@ export const ReadMessageFromLinkDefinition = DefineFunction({
           type: Schema.types.string,
           description: "Link to Slack message",
         },
-        workInThreads: {
+        disableInThreads: {
           type: Schema.types.boolean,
           description: "Allow fetching message content from threaded replies",
-          default: true
         },
       },
       required: ["messageLink"],
@@ -50,7 +49,7 @@ export default SlackFunction(
         };
       }
       if (threadParent?.length == 1){
-        if (inputs.workInThreads === false){
+        if (inputs.disableInThreads){
           return {
             error: `This step is configured to only work on top-level messages`,
           };
