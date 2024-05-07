@@ -15,6 +15,9 @@ export const ReadMessageFromLinkDefinition = DefineFunction({
           type: Schema.types.boolean,
           description: "Allow fetching message content from threaded replies",
         },
+        messageContext: {
+          type: Schema.slack.types.message_context,
+        }
       },
       required: ["messageLink"],
     },
@@ -37,6 +40,8 @@ export default SlackFunction(
     ReadMessageFromLinkDefinition,
     async ({ inputs, client }) => {
       const THREAD_TS_REGEX = /thread_ts=[0-9\.]+/g
+      console.log(inputs.messageLink)
+      console.log(inputs.messageContext)
 
       //example messageLink: https://example.slack.com/archives/C01ABCDEFGH/p123456789012345
       //example threaded messageLink: https://example.slack.com/archives/C01ABCDEFGH/p123456789012345?thread_ts=123456789.012345&cid=C01234567
