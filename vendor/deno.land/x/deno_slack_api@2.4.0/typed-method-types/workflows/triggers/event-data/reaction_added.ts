@@ -15,6 +15,8 @@ export const ReactionAdded = {
    * A unique {@link https://api.slack.com/automation/types#message-ts Slack message timestamp string} indicating when the message being reacted to was sent.
    */
   message_ts: "{{data.message_ts}}",
+
+  parent_message_link: "{{data.parent_message_link}}",
   /**
    * A string representing the emoji name.
    */
