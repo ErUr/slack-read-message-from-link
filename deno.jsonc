@@ -4,14 +4,16 @@
     "include": [
       "README.md",
       "manifest.ts",
-      "read_message_from_link.ts"
+      "read_message_from_link.ts",
+      "workflows/**"
     ]
   },
-  "importMap": "import_map.json",
+  "importMap": "./import_map.json",
   "lint": {
     "include": [
       "main.ts",
-      "read_message_from_link.ts"
+      "read_message_from_link.ts",
+      "workflows/**"
     ]
   },
   "lock": false,
