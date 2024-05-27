@@ -8,7 +8,7 @@
       "workflows/**"
     ]
   },
-  "importMap": "./import_map.json",
+  "importMap": "./vendor/import_map.json",
   "lint": {
     "include": [
       "main.ts",
