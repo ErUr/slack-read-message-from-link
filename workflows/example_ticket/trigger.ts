@@ -26,7 +26,13 @@ const createNewIssueShortcut: Trigger<
     },
     message_context: {
       value: TriggerContextData.Event.ReactionAdded.message_context,
-    }
+    },
+    message_link: {
+      value: TriggerContextData.Event.ReactionAdded.message_link,
+    },
+    parent_link: {
+      value: TriggerContextData.Event.ReactionAdded.parent_message_link,
+    },
   },
 };
 
