@@ -1,7 +1,7 @@
 import { Trigger } from "deno-slack-sdk/types.ts";
 import { TriggerEventTypes, TriggerTypes, TriggerContextData } from "deno-slack-api/mod.ts";
 
-import { ExampleTicketWorkflow } from "./example_ticket_workflow.ts";
+import { ExampleTicketWorkflow } from "./example_workflow.ts";
 
 const createNewIssueShortcut: Trigger<
   typeof ExampleTicketWorkflow.definition
@@ -16,7 +16,7 @@ const createNewIssueShortcut: Trigger<
     filter: {
       version: 1,
       root: {
-        statement: "{{data.reaction}} == example-ticket"
+        statement: "{{data.reaction}} == asana"
       }
     }
   },
